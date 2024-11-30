@@ -1,7 +1,23 @@
+import WordGame.WordGame;
+
+import java.io.IOException;
 import java.util.Scanner;
 
+//TODO: check if this is allowed
 import static MyGame.MyGame.MY_GAME_NAME;
 
+/**
+ * The {@code Main} class has a command line
+ * interface to play one the games from the list:
+ * <ul>
+ *     <li>Word Game</li>
+ *     <li>Number Game</li>
+ *     <li>My (custom) Game</li>
+ * </ul>
+ *
+ * @author Vincent Fung and Jason Lau
+ * @version 1.0
+ */
 public class Main {
 
     private static final String WORD_GAME_LETTER_OPTION     = "W";
@@ -9,17 +25,23 @@ public class Main {
     private static final String MY_GAME_LETTER_OPTION       = "M";
     private static final String QUIT_LETTER_OPTION          = "Q";
 
+    // WORD GAME CONSTANTS
+    private static final String PLAY_GAME_AGAIN_VALUE = "yes";
+    private static final String QUIT_GAME_VALUE = "no";
+
     public static void main(final String[] args)
     {
+        final WordGame wordGame;
+
         final Scanner userinputScanner;
         String enteredLetterOption;
 
+        wordGame = new WordGame();
         userinputScanner = new Scanner(System.in);
 
         System.out.print(
                 System.lineSeparator() +
                 "Welcome! " +
-                System.lineSeparator() +
                 System.lineSeparator()
         );
 
@@ -41,43 +63,54 @@ public class Main {
             switch (enteredLetterOption)
             {
                 case WORD_GAME_LETTER_OPTION:
+                {
                     System.out.println(
                             System.lineSeparator() +
                             "Starting Word game ..." +
                             System.lineSeparator()
                     );
+
+                    playWordGame(wordGame);
+
                     break;
+                }
+
 
                 case NUMBER_GAME_LETTER_OPTION:
+                {
                     System.out.println(
                             System.lineSeparator() +
-                            "Starting Number game ..." +
-                            System.lineSeparator()
+                            "Starting Number game ..."
                     );
                     break;
+                }
 
                 case MY_GAME_LETTER_OPTION:
+                {
                     System.out.println(
                             System.lineSeparator() +
-                            "Starting "  + MY_GAME_NAME + " ..." +
-                            System.lineSeparator()
+                            "Starting "  + MY_GAME_NAME + " ..."
                     );
                     break;
+                }
 
                 case QUIT_LETTER_OPTION:
+                {
                     System.out.println(
                             System.lineSeparator() +
-                            "Ending program." +
-                            System.lineSeparator()
+                            "Ending program."
                     );
                     break;
+                }
 
                 default:
+                {
                     System.out.println(
                             System.lineSeparator() +
                             "Invalid option entered. Please try again." +
                             System.lineSeparator()
                     );
+                }
             }
 
         }
@@ -85,4 +118,68 @@ public class Main {
 
         userinputScanner.close();
     }
+
+    private static void playWordGame(final WordGame wordGame)
+    {
+        if (wordGame == null)
+        {
+            throw new NullPointerException("Word game cannot be null");
+        }
+
+        final Scanner userInputScanner;
+        String enteredPlayAgainChoice;
+
+        userInputScanner = new Scanner(System.in);
+
+        do
+        {
+
+            String userInputBuffer;
+
+            wordGame.playGame();
+
+            do
+            {
+                System.out.print("Would you like to play again? (enter yes or no): ");
+                userInputBuffer = userInputScanner.nextLine();
+                userInputBuffer = userInputBuffer.trim()
+                                                 .toLowerCase();
+
+                if (!userInputBuffer.equals(PLAY_GAME_AGAIN_VALUE)
+                        &&
+                    !userInputBuffer.equals(QUIT_GAME_VALUE))
+                {
+                    System.out.println(
+                            System.lineSeparator() +
+                            "Invalid option entered. Please try again."
+                    );
+                }
+                System.out.print(System.lineSeparator());
+            }
+            while (
+                    !userInputBuffer.equals(PLAY_GAME_AGAIN_VALUE)
+                    &&
+                    !userInputBuffer.equals(QUIT_GAME_VALUE)
+            );
+
+            if (userInputBuffer.equals(QUIT_GAME_VALUE))
+            {
+                try
+                {
+                    wordGame.saveScoreForAllGamesAtCurrentDate();
+//                    wordGame.checkIfNewHighScore();
+                }
+                catch(final IOException exception)
+                {
+                    System.err.println("Unable to save score for all games at current date");
+                    System.err.println(exception.getMessage());
+                }
+            }
+
+            enteredPlayAgainChoice = userInputBuffer;
+        }
+        while ( enteredPlayAgainChoice.equals(PLAY_GAME_AGAIN_VALUE) );
+
+    }
+
 }
