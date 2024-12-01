@@ -1,18 +1,23 @@
 package WordGame;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class WordGame {
 
-    private final World worldObjWordGame;
-    private int numGamesPlayed;
-    private int numCorrectQuestionsFirstAttempt;
-    private int numCorrectQuestionsSecondAttempt;
-    private int numIncorrectQuestions;
-    private final List<Score> scores;
+    private final World         worldObjWordGame;
+    private int                 numGamesPlayed;
+    private int                 numCorrectQuestionsFirstAttempt;
+    private int                 numCorrectQuestionsSecondAttempt;
+    private int                 numIncorrectQuestions;
+    private final List<Score>   scores;
 
     final String SCORE_FILE_PATH_NAME = "src/WordGame/score.txt";
 
@@ -36,7 +41,11 @@ public class WordGame {
     private static final int ONE_WORD_GAME                  = 1;
     private static final int INITIAL_ATTEMPT_NUM            = 1;
     private static final int ALLOWED_NUM_ATTEMPTS           = 2;
-    private static final int INITIAL_QUESTION_SCORE_COUNT       = 0;
+    private static final int INITIAL_QUESTION_SCORE_COUNT   = 0;
+
+    private static final int EQUAL_AVG_SCORE_COMPARE_RESULT_VAL = 0;
+
+    private static final String AVG_SCORE_FORMAT_PATTERN        = "#0.00";
 
     private static final String RANDOM_QUESTION_1 = "What is the name of the country with the capital city of";
     private static final String RANDOM_QUESTION_2 = "What is the capital city of";
@@ -44,14 +53,12 @@ public class WordGame {
 
     public WordGame()
     {
+        final Path scoreFilePath;
+        scoreFilePath = Paths.get(SCORE_FILE_PATH_NAME);
+
         try
         {
-            this.worldObjWordGame               = new World();
-            this.scores                         = new ArrayList<>();
-            numGamesPlayed                      = INITIAL_NUM_GAMES_PLAYED;
-            numCorrectQuestionsFirstAttempt     = INITIAL_QUESTION_SCORE_COUNT;
-            numCorrectQuestionsSecondAttempt    = INITIAL_QUESTION_SCORE_COUNT;
-            numIncorrectQuestions               = INITIAL_QUESTION_SCORE_COUNT;
+            this.worldObjWordGame = new World();
         }
         catch (final IOException exception)
         {
@@ -60,6 +67,30 @@ public class WordGame {
                     + exception.getMessage()
             );
         }
+
+        if (Files.notExists(scoreFilePath))
+        {
+            this.scores = new ArrayList<>();
+        }
+        else
+        {
+            try
+            {
+                this.scores = Score.readScoresFromFile(SCORE_FILE_PATH_NAME);
+            }
+            catch (final FileNotFoundException exception)
+            {
+                throw new WordGameCreationException(
+                        "Unable to create WordGame object:"
+                        + exception.getMessage()
+                );
+            }
+        }
+
+        numGamesPlayed                      = INITIAL_NUM_GAMES_PLAYED;
+        numCorrectQuestionsFirstAttempt     = INITIAL_QUESTION_SCORE_COUNT;
+        numCorrectQuestionsSecondAttempt    = INITIAL_QUESTION_SCORE_COUNT;
+        numIncorrectQuestions               = INITIAL_QUESTION_SCORE_COUNT;
     }
 
     public void playGame()
@@ -110,33 +141,89 @@ public class WordGame {
      * Saves score to a list of scores and to a file.
      * @throws IOException if there was an issue while creating or writing to file
      */
-    public void saveScoreForAllGamesAtCurrentDate() throws IOException
+    public void saveWordGameScoreAndDeleteCurrent() throws IOException
     {
         final Score score;
 
-        score = createScore();
-
-//        checkIfNewHighScore(score);
-
+        score = createScoreForCurrentGame();
         scores.add(score);
         Score.appendScoreToFile(score, SCORE_FILE_PATH_NAME);
-
 
         resetAllScoreValues();
     }
 
-//    private void checkIfNewHighScore(final Score score)
-//    {
-//
-//        Consumer<String> consumer;
-//        consumer =
-//        scores.forEach()
-//    }
+    public void checkAndDisplayIfCurrentWordGameIsHighScore()
+    {
+        final Optional<Score>   highestScoreOptional;
+        final Score             currentGameScore;
+        final Score             highestScore;
 
-    private Score createScore()
+        final double currentGameAvgScoreVal;
+        final double highestGameAvgScoreVal;
+        final double avgScoreComparisonDifference;
+        final String formattedCurrentAvgScore;
+        final String formattedHighestAvgScore;
+
+        highestScoreOptional    = this.getCurrentHighScore();
+        currentGameScore        = this.createScoreForCurrentGame();
+
+        currentGameAvgScoreVal              = currentGameScore.getAverageScore();
+        formattedCurrentAvgScore            = formatAverageScore(currentGameAvgScoreVal);
+
+        if (highestScoreOptional.isPresent())
+        {
+            highestScore                    = highestScoreOptional.get();
+            highestGameAvgScoreVal          = highestScore.getAverageScore();
+            avgScoreComparisonDifference    = Double.compare(currentGameAvgScoreVal, highestGameAvgScoreVal);
+
+            formattedHighestAvgScore        = formatAverageScore(highestGameAvgScoreVal);
+
+            // If currentGameAvgScoreVal > highestGameAvgScoreVal (semantically)
+            if (avgScoreComparisonDifference > EQUAL_AVG_SCORE_COMPARE_RESULT_VAL)
+            {
+                System.out.println(
+                        "CONGRATULATIONS! " +
+                        "You are the new high score with an average of " +
+                        formattedCurrentAvgScore +
+                        " points per game; " +
+                        "the previous record was " +
+                        formattedHighestAvgScore +
+                        " points per game on " +
+                        highestScore.getDatePlayed() +
+                        " at " +
+                        highestScore.getTimePlayed() +
+                        System.lineSeparator()
+                );
+            }
+            else
+            {
+                System.out.println(
+                        "You did not beat the high score of " +
+                        formattedHighestAvgScore +
+                        " points per game from " +
+                        highestScore.getDatePlayed() +
+                        " at " +
+                        highestScore.getTimePlayed() +
+                        System.lineSeparator()
+                );
+            }
+        }
+        else
+        {
+            System.out.println(
+                    "First WordGame entry saved. " +
+                    "You have the first high score with an average of " +
+                    formattedCurrentAvgScore +
+                    " points per game" +
+                    System.lineSeparator()
+            );
+        }
+    }
+
+    private Score createScoreForCurrentGame()
     {
         final LocalDateTime dateTimePlayed;
-        final Score score;
+        final Score         score;
 
         dateTimePlayed = LocalDateTime.now();
         score = new Score(
@@ -156,6 +243,21 @@ public class WordGame {
         numCorrectQuestionsFirstAttempt     = INITIAL_QUESTION_SCORE_COUNT;
         numCorrectQuestionsSecondAttempt    = INITIAL_QUESTION_SCORE_COUNT;
         numIncorrectQuestions               = INITIAL_QUESTION_SCORE_COUNT;
+    }
+
+    /**
+     * Returns a Score object with the highest total score.
+     * @return an Optional object of type Score class.
+     */
+    private Optional<Score> getCurrentHighScore()
+    {
+        final Comparator<Score> comparatorScore;
+        final Optional<Score> largestScore;
+
+        comparatorScore = Comparator.comparingDouble(Score::getAverageScore);
+        largestScore = scores.stream().max(comparatorScore);
+
+        return largestScore;
     }
 
     private void displayGameScore()
@@ -440,6 +542,17 @@ public class WordGame {
         formattedQuestion = sbFormattedQuestion.toString();
 
         return formattedQuestion;
+    }
+
+    private static String formatAverageScore(final double avgScore)
+    {
+        final NumberFormat formatter;
+        final String formattedAvgScore;
+
+        formatter           = new DecimalFormat(AVG_SCORE_FORMAT_PATTERN);
+        formattedAvgScore   = formatter.format(avgScore);
+
+        return formattedAvgScore;
     }
 
 

@@ -1,0 +1,40 @@
+Date and Time: 2024-11-30 18:46:27
+Games Played: 2
+Correct First Attempts: 0
+Correct Second Attempts: 0
+Incorrect Attempts: 20
+Score: 0 points
+Average Score: 0.00 points/game
+
+Date and Time: 2024-11-30 18:46:49
+Games Played: 1
+Correct First Attempts: 0
+Correct Second Attempts: 0
+Incorrect Attempts: 10
+Score: 0 points
+Average Score: 0.00 points/game
+
+Date and Time: 2024-11-30 18:48:11
+Games Played: 1
+Correct First Attempts: 1
+Correct Second Attempts: 2
+Incorrect Attempts: 7
+Score: 4 points
+Average Score: 4.00 points/game
+
+Date and Time: 2024-11-30 18:50:44
+Games Played: 2
+Correct First Attempts: 3
+Correct Second Attempts: 1
+Incorrect Attempts: 16
+Score: 7 points
+Average Score: 3.50 points/game
+
+Date and Time: 2024-11-30 18:51:59
+Games Played: 1
+Correct First Attempts: 0
+Correct Second Attempts: 0
+Incorrect Attempts: 10
+Score: 0 points
+Average Score: 0.00 points/game
+

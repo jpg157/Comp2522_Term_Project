@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -28,6 +30,9 @@ public class Score {
 
     private static final int    MIN_NUM_GAMES_PLAYED                       = 1;
     private static final int    MIN_ATTEMPT_NUM_VALUE                      = 0;
+
+    private static final String AVG_SCORE_FORMAT_PATTERN                   = "#0.00";
+    private static final int    TWO_DIGIT_TIME_UNIT                        = 10;
     private static final int    EQUAL_DATE_STRING_COMPARE_RESULT           = 0;
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter formatter;
@@ -55,6 +60,52 @@ public class Score {
         this.numIncorrectTwoAttempts    = numIncorrectTwoAttempts;
     }
 
+    public String getDatePlayed() {
+        final StringBuilder sbDatePlayed;
+        final String        datePlayed;
+        final int           year;
+        final int           month;
+        final int           day;
+
+        sbDatePlayed    = new StringBuilder();
+        year            = this.dateTimePlayed.getYear();
+        month           = this.dateTimePlayed.getMonthValue();
+        day             = this.dateTimePlayed.getDayOfMonth();
+
+        sbDatePlayed.append(year);
+        sbDatePlayed.append("-");
+        sbDatePlayed.append(month);
+        sbDatePlayed.append("-");
+        sbDatePlayed.append(day);
+
+        datePlayed = sbDatePlayed.toString();
+
+        return datePlayed;
+    }
+
+    public String getTimePlayed() {
+        final StringBuilder sbTimePlayed;
+        final String        timePlayed;
+        final String        hour;
+        final String        minute;
+        final String        second;
+
+        sbTimePlayed    = new StringBuilder();
+        hour            = formatTimeUnit(this.dateTimePlayed.getHour());
+        minute          = formatTimeUnit(this.dateTimePlayed.getMinute());
+        second          = formatTimeUnit(this.dateTimePlayed.getSecond());
+
+        sbTimePlayed.append(hour);
+        sbTimePlayed.append(":");
+        sbTimePlayed.append(minute);
+        sbTimePlayed.append(":");
+        sbTimePlayed.append(second);
+
+        timePlayed = sbTimePlayed.toString();
+
+        return timePlayed;
+    }
+
     public int getScore()
     {
         final int totalScore;
@@ -62,6 +113,20 @@ public class Score {
         totalScore = calculateTotalScore(this.numCorrectFirstAttempt, this.numCorrectSecondAttempt);
 
         return totalScore;
+    }
+
+    public double getAverageScore()
+    {
+        final NumberFormat formatter;
+        final double avgScore;
+
+        formatter = new DecimalFormat("#0.00");
+
+        avgScore = (double) this.getScore() / (double) this.getNumGamesPlayed();
+
+        formatter.format(avgScore);
+
+        return avgScore;
     }
 
     public int getNumGamesPlayed()
@@ -116,18 +181,25 @@ public class Score {
         validateScore(score);
         validateScoreFilePathName(scoreFilePathName);
 
-        final StringBuilder sbScoreData;
-        final int avgScore;
-        final String scoreDataString;
         final Path scoreFilePath;
 
-        sbScoreData     = new StringBuilder();
-        avgScore        = score.getScore() / score.getNumGamesPlayed();
-        scoreFilePath   = Paths.get(scoreFilePathName);
+        final StringBuilder sbScoreData;
+        final String scoreDataString;
+
+        final NumberFormat formatter;
+        final double avgScore;
+        final String formattedAvgScore;
+
+        scoreFilePath       = Paths.get(scoreFilePathName);
+
+        sbScoreData         = new StringBuilder();
+        formatter           = new DecimalFormat(AVG_SCORE_FORMAT_PATTERN);
+        avgScore            = score.getAverageScore();
+        formattedAvgScore   = formatter.format(avgScore);
 
         sbScoreData.append(score);
         sbScoreData.append("Average Score: ");
-        sbScoreData.append(avgScore);
+        sbScoreData.append(formattedAvgScore);
         sbScoreData.append(" points/game");
         sbScoreData.append(System.lineSeparator());
         sbScoreData.append(System.lineSeparator());
@@ -257,6 +329,24 @@ public class Score {
         totalScore = totalScoreFirstAttempt + totalScoreSecondAttempt;
 
         return totalScore;
+    }
+
+    private static String formatTimeUnit(final int timeUnit)
+    {
+        final StringBuilder sbTimeUnit;
+        final String formattedTimeUnit;
+
+        sbTimeUnit = new StringBuilder();
+
+        if (timeUnit < TWO_DIGIT_TIME_UNIT)
+        {
+            sbTimeUnit.append("0");
+        }
+
+        sbTimeUnit.append(timeUnit);
+        formattedTimeUnit = sbTimeUnit.toString();
+
+        return formattedTimeUnit;
     }
 
     //===

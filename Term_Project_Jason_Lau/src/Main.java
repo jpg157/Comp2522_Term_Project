@@ -1,10 +1,11 @@
-import WordGame.WordGame;
-
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Scanner;
 
 //TODO: check if this is allowed
-import static MyGame.MyGame.MY_GAME_NAME;
+import WordGame.WordGame;
+import NumberGame.NumberGame;
+import MyGame.MyGame;
 
 /**
  * The {@code Main} class has a command line
@@ -26,18 +27,23 @@ public class Main {
     private static final String QUIT_LETTER_OPTION          = "Q";
 
     // WORD GAME CONSTANTS
-    private static final String PLAY_GAME_AGAIN_VALUE = "yes";
-    private static final String QUIT_GAME_VALUE = "no";
+    private static final String PLAY_GAME_AGAIN_VALUE       = "yes";
+    private static final String QUIT_GAME_VALUE             = "no";
 
     public static void main(final String[] args)
     {
-        final WordGame wordGame;
+        final WordGame      wordGame;
+        final NumberGame    numberGame;
+        final MyGame        myGame;
 
-        final Scanner userinputScanner;
-        String enteredLetterOption;
+        final Scanner       userinputScanner;
+        String              enteredLetterOption;
 
-        wordGame = new WordGame();
-        userinputScanner = new Scanner(System.in);
+        wordGame            = new WordGame();
+        numberGame          = new NumberGame();
+        myGame              = new MyGame();
+
+        userinputScanner    = new Scanner(System.in);
 
         System.out.print(
                 System.lineSeparator() +
@@ -51,7 +57,7 @@ public class Main {
                 "Please enter one of the following options: "   + System.lineSeparator() +
                 "Press W to play the Word game."                + System.lineSeparator() +
                 "Press N to play the Number game."              + System.lineSeparator() +
-                "Press M to play " + MY_GAME_NAME + "."         + System.lineSeparator() +
+                "Press M to play " + MyGame.MY_GAME_NAME + "."  + System.lineSeparator() +
                 "Press Q to quit."                              + System.lineSeparator() +
                                                                 System.lineSeparator() +
                 "Your option: "
@@ -133,14 +139,15 @@ public class Main {
 
         do
         {
-
             String userInputBuffer;
 
+            // Play the word game
             wordGame.playGame();
 
             do
             {
                 System.out.print("Would you like to play again? (enter yes or no): ");
+
                 userInputBuffer = userInputScanner.nextLine();
                 userInputBuffer = userInputBuffer.trim()
                                                  .toLowerCase();
@@ -166,8 +173,8 @@ public class Main {
             {
                 try
                 {
-                    wordGame.saveScoreForAllGamesAtCurrentDate();
-//                    wordGame.checkIfNewHighScore();
+                    wordGame.checkAndDisplayIfCurrentWordGameIsHighScore();
+                    wordGame.saveWordGameScoreAndDeleteCurrent();
                 }
                 catch(final IOException exception)
                 {
@@ -181,5 +188,6 @@ public class Main {
         while ( enteredPlayAgainChoice.equals(PLAY_GAME_AGAIN_VALUE) );
 
     }
+
 
 }
