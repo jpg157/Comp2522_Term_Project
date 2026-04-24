@@ -2,10 +2,6 @@
 
 A command-line game hub with 3 playable games, built as the term project for BCIT's COMP 2522 Object Oriented Programming 1 course.
 
-**Authors:** Jason Lau
-
----
-
 ## Games
 
 ### Word Game
@@ -17,15 +13,11 @@ A geography quiz that tests your knowledge of world capitals and country facts. 
 ### Hex Game
 *(Coming soon)*
 
----
-
 ## Tech Stack
 
 - **Language:** Java 21
 - **IDE:** IntelliJ IDEA (plain module — no Maven or Gradle)
 - **Testing:** JUnit Jupiter 5.8.1
-
----
 
 ## Installation
 
