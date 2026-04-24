@@ -4,7 +4,7 @@ A command-line game hub with 3 playable games, built as the term project for BCI
 
 ## Games
 
-### Word Game
+### Geography Quiz Game (Word Game)
 A geography quiz that tests your knowledge of world capitals and country facts. Each session presents 10 randomized questions — you get 2 attempts per question. Scores are tracked across sessions, saved to a local file, and compared against your personal high score.
 
 ### Number Game
